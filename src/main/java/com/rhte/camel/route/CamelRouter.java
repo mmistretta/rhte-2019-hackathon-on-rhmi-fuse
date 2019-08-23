@@ -19,10 +19,12 @@ package com.rhte.camel.route;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.rhte.camel.model.JunctionInfo;
 import com.rhte.camel.model.MeterInfo;
+import com.rhte.camel.processor.MakeSampleData;
 /**
  * A simple Camel route that triggers from a timer and calls a bean and prints to system out.
  * <p/>
@@ -31,6 +33,9 @@ import com.rhte.camel.model.MeterInfo;
 
 @Component
 public class CamelRouter extends RouteBuilder {
+	
+	@Autowired
+	private MakeSampleData msd;
 
     @Override
     public void configure() throws Exception {
@@ -60,16 +65,18 @@ public class CamelRouter extends RouteBuilder {
         
        from("direct:generate-samples")
             .routeId("log-hello")
-            .log(LoggingLevel.INFO, "generate-samples")
-            .transform().simple("generate-samples");
+            .bean(msd, "generateSamples")
+            .log(LoggingLevel.INFO, "generate-samples: ${body}");
 
        from("direct:junction-info")
             .log("Successful POST request: ${body}")
-            .transform().simple("Junction info posted");
+            .bean(msd,"insertJunction")
+            .log(LoggingLevel.INFO, "junction insert: ${body}");
        
        from("direct:meter-info")
        		.log("Successful POST request: ${body}")
-       		.transform().simple("Meter info posted");
+            .bean(msd,"insertMeter")
+            .log(LoggingLevel.INFO, "meter insert: ${body}");
     }
 
 }
