@@ -47,8 +47,7 @@ public class CamelRouter extends RouteBuilder {
             	//could have query param of status or not 
                 //.responseMessage().code(200).message("OK").endResponseMessage()
                 .route().routeId("parking-meters")
-                .to("sql:select * from meter_info;")
-                //.to("direct:parking-meters")
+                .to("direct:parking-meters")
                 .endRest()
             .get("/parking/meters/{meter-id}").produces("text/plain")
                 .responseMessage().code(200).message("OK").endResponseMessage()
@@ -68,9 +67,7 @@ public class CamelRouter extends RouteBuilder {
         
        from("direct:parking-meters")
        		.log(LoggingLevel.INFO, "Parking Meters with status ${in.header.status}")
-       		.streamCaching()
        		.to("sql:select * from meter_info;");
-       		//.to("log:meter-info");
        
        from("direct:parking-meters-id")
        		.log(LoggingLevel.INFO, "Parking Meters ID ${header.meter-id}");
